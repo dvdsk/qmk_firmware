@@ -1,0 +1,494 @@
+#include QMK_KEYBOARD_H
+#include "debug.h"
+#include "action_layer.h"
+#include "version.h"
+
+#define COLEMAK 0 // default layer
+#define PROGRAMMER 1 // default layer
+#define QWERTY 2 // default layer
+#define ANSI 3 // default layer
+#define MOVEMODE 4 // symbols
+
+#define COLEMAK_SHIFTED 5 // default layer
+#define QWERTY_SHIFTED 6 // default layer
+
+#define ATAB 7
+
+bool altTabbing = false;
+bool shiftIsOn = false;
+uint16_t shiftPressed;
+uint16_t winManagmentPressed;
+
+#define CLOSE_WIN_INTERVAL 300
+enum macroKeycodes {
+  M_BAT = SAFE_RANGE, //begin alt tab
+  M_EAT,              //end alt-tab
+  MAIL_END,
+  WIN_MM,
+  TAPP,
+  SPSHFT
+};
+
+const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
+/* Keymap 0: Colemak
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |   Esc  |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  | lock   |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |   q  |   w  |   f  |   p  |   g  |      |           |      |   j  |   l  |   u  |   y  |   ?  | tapp   |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * | mov_W  |   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
+ * |--------+------+------+------+------+------| del  |           | alt  |------+------+------+------+------+--------|
+ * | shift* |   z  |   x  |   c  |   v  |   b  |      |           |      |   k  |   m  |   ,  |   .  |   ;  | shift  |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   | ctrl | alt  | gui  | Left | Right|                                       |  Up  |  Down| S-Tab| vol- | vol+ |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,------------.
+ *                                        |      | QWRT |       | ANSI |     |
+ *                                 ,------|------|------|       |------+-----+-------.
+ *                                 |      |      |      |       |      |     |       |
+ *                                 |------|------|------|       |------|-----|-------|
+ *                                 | Space| BkSp | save |       | PROG | Tab | enter |
+ *                                 `--------------------'       `--------------------'
+ *
+ * shift*: small to caps 
+ *          left/right/up/down to home/end/pageup/pagedown
+ *          numbers to F keys
+ * mov_W:  moves windows around and gives access to function keys
+ * S-TAB:  shift tab
+ *
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[COLEMAK] = KEYMAP(  // layer 0 : default
+        // left hand 
+        KC_ESC,                    KC_1,       KC_2,   KC_3,   KC_4,   KC_5,   KC_LOCK,
+        KC_NO,                     KC_Q,       KC_W,   KC_F,   KC_P,   KC_G,   KC_NO,
+        TT(MOVEMODE),              KC_A,       KC_R,   KC_S,   KC_T,   KC_D,
+        LT(COLEMAK_SHIFTED, KC_NO),KC_Z,       KC_X,   KC_C,   KC_V,   KC_B,   KC_DEL,
+        KC_LCTRL,                  KC_RALT,    KC_LGUI,KC_LEFT,KC_RGHT,
+                                                            KC_NO,  TG(QWERTY),
+                                                                    KC_NO,
+                                                    KC_SPC, KC_BSPC,LCTL(KC_S),
+        // right hand
+             KC_NO,     KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             KC_NO,
+             KC_NO,     KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          KC_NO,
+                        KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
+             KC_RALT,   KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
+                                KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
+             TG(ANSI),      KC_NO,
+             KC_NO,
+             MO(PROGRAMMER),KC_TAB,  KC_ENT
+    ),
+/* Keymap 0: COLEMAK_SHIFTED
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |   Esc  |   !  |   @  |   #  |   $  |   %  |      |           |      |   ^  |   &  |   *  |   (  |   )  |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |   Q  |   W  |   F  |   P  |   G  |      |           |      |   J  |   L  |   U  |   Y  |   ?  |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |   A  |   R  |   S  |   T  |   D  |------|           |------|   H  |   N  |   E  |   I  |   O  |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |   Z  |   X  |   C  |   V  |   B  |      |           |      |   K  |   M  |      |      |   :  |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      | Home | End  |                                       | pagUp|paDown| pause| next | prev |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,------------.
+ *                                        |      |      |       |      |     |
+ *                                 ,------|------|------|       |------+-----+-------.
+ *                                 |      |      |      |       |      |     |       |
+ *                                 |------|------|------|       |------|-----|-------|
+ *                                 |      |      |      |       |      |     |       |
+ *                                 `--------------------'       `--------------------'
+ * 
+ * shift* small to caps and left/right/up/down to home/end/pageup/pagedown
+ *
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[COLEMAK_SHIFTED] = KEYMAP(  // layer 0 : default
+        // left hand
+        KC_TRNS, LSFT(KC_1), LSFT(KC_2), LSFT(KC_3), LSFT(KC_4), LSFT(KC_5),   KC_TRNS,
+        KC_TRNS, LSFT(KC_Q), LSFT(KC_W), LSFT(KC_F), LSFT(KC_P), LSFT(KC_G),   KC_TRNS,
+        KC_TRNS, LSFT(KC_A), LSFT(KC_R), LSFT(KC_S), LSFT(KC_T), LSFT(KC_D),
+        KC_TRNS, LSFT(KC_Z), LSFT(KC_X), LSFT(KC_C), LSFT(KC_V), LSFT(KC_B),   KC_TRNS,
+        KC_TRNS, KC_TRNS,    KC_TRNS,    KC_HOME,    KC_END,
+                                                            KC_TRNS,  KC_TRNS,
+                                                                      KC_TRNS,
+                                                  KC_TRNS,  KC_TRNS,  KC_TRNS,
+        // right hand
+             KC_TRNS, LSFT(KC_6), LSFT(KC_7), LSFT(KC_8), LSFT(KC_9), LSFT(KC_0),    KC_TRNS,
+             KC_TRNS, LSFT(KC_J), LSFT(KC_L), LSFT(KC_U), LSFT(KC_Y), LSFT(KC_QUES), KC_TRNS,
+                      LSFT(KC_H), LSFT(KC_N), LSFT(KC_E), LSFT(KC_I), LSFT(KC_O),    KC_TRNS,
+             KC_TRNS, LSFT(KC_K), LSFT(KC_M), KC_TRNS,    KC_TRNS,    LSFT(KC_SCLN), KC_TRNS,
+                                  KC_PGUP,    KC_PGDN,    KC_MPLY,    KC_MNXT,       KC_MPRV,
+             KC_TRNS,  KC_TRNS,
+             KC_TRNS,  
+             KC_TRNS,  KC_TRNS,   KC_TRNS
+    ),
+/* Keymap 1: Programmer 
+ *
+* ,-----M_BAT---------------------------------------------.           ,--------------------------------------------------.
+ * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |      |      |   /  |   +  |  "   |      |           |      |  _   |  -   |  *   |      |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |   [  |   {  |   (  |   =  |  <   |------|           |------|  >   |  =   |   )  |   }  |   ]  |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                          ,-------------.       ,-------------.
+ *                                          |      |      |       |      |      |
+ *                                 ,--------|------|------|       |------+------+----------.
+ *                                 |        |      |      |       |      |      |          |
+ *                                 |--------|------|------|       |------|------|----------|
+ *                                 |MAIL_END|      |      |       |      |      |          |
+ *                                 `----------------------'       `------------------------'
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[PROGRAMMER] = KEYMAP(  // layer 0 : default
+    // left hand
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_PSLS, KC_PPLS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_LBRC, KC_LCBR, KC_LPRN, KC_PEQL, KC_LT,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                                           KC_TRNS, KC_TRNS,
+								                                    KC_TRNS,
+                                  MAIL_END,KC_TRNS, KC_TRNS,
+    // right hand
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_UNDS, KC_PMNS, KC_PAST, KC_TRNS, KC_TRNS, KC_TRNS,
+                 KC_GT,   KC_PEQL, KC_RPRN, KC_RCBR, KC_RBRC, KC_TRNS,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                          KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS,
+       KC_TRNS, 
+       KC_TRNS, KC_TRNS, KC_TRNS
+    ),
+/* Keymap 2: Qwerty
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |   Q  |   W  |   E  |   R  |   T  |      |           |      |   Y  |   U  |   I  |   O  |   P  |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  |   J  |   K  |   L  |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |      |      |      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |        |
+ *                                 ,------|------|------|       |------+--------+------.
+ *                                 |      |      |      |       |      |        |      |
+ *                                 |------|------|------|       |------|--------|------|
+ *                                 |      |      |      |       |      |        |      |
+ *                                 `--------------------'       `----------------------'
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[QWERTY] = KEYMAP(  // layer 0 : default
+        // left hand
+        KC_TRNS,                     KC_1,        KC_2,   KC_3,   KC_4,   KC_5,   KC_TRNS,
+        KC_TRNS,                     KC_Q,        KC_W,   KC_E,   KC_R,   KC_T,   KC_TRNS,
+        LT(COLEMAK_SHIFTED, KC_NO),  KC_A,        KC_S,   KC_D,   KC_F,   KC_G,
+        KC_TRNS,                     KC_Z,        KC_X,   KC_C,   KC_V,   KC_B,   KC_TRNS,
+        KC_TRNS,                     KC_TRNS,     KC_TRNS,KC_TRNS,KC_TRNS,
+                                                            KC_TRNS, KC_TRNS,
+                                                                     KC_TRNS,
+                                                  KC_TRNS,  KC_TRNS, KC_TRNS,
+        // right hand
+             KC_TRNS,     KC_6,   KC_7,   KC_8,   KC_9,   KC_0,     KC_TRNS,
+             KC_TRNS,     KC_Y,   KC_U,   KC_I,   KC_O,   KC_P,     KC_TRNS,
+                          KC_H,   KC_J,   KC_K,   KC_L,   KC_TRNS,  LT(COLEMAK_SHIFTED, KC_NO),
+             KC_TRNS,     KC_N,   KC_M,   KC_TRNS,KC_TRNS,KC_TRNS,  KC_TRNS,
+                                  KC_TRNS,KC_TRNS,KC_TRNS,KC_TRNS,  KC_TRNS,
+             KC_TRNS,KC_TRNS,
+             KC_TRNS,
+             KC_TRNS,KC_TRNS, KC_TRNS
+    ),
+/* Keymap 2: Qwerty
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |   Q  |   W  |   E  |   R  |   T  |      |           |      |   Y  |   U  |   I  |   O  |   P  |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |   A  |   S  |   D  |   F  |   G  |------|           |------|   H  |   J  |   K  |   L  |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |   X  |   C  |   V  |   B  |      |           |      |   N  |   M  |      |      |      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |        |
+ *                                 ,------|------|------|       |------+--------+------.
+ *                                 |      |      |      |       |      |        |      |
+ *                                 |------|------|------|       |------|--------|------|
+ *                                 |      |      |      |       |      |        |      |
+ *                                 `--------------------'       `----------------------'
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[QWERTY_SHIFTED] = KEYMAP(  // layer 0 : default
+        // left hand
+        KC_TRNS, LSFT(KC_1), LSFT(KC_2), LSFT(KC_3), LSFT(KC_4), LSFT(KC_5),   KC_TRNS,
+        KC_TRNS, LSFT(KC_Q), LSFT(KC_W), LSFT(KC_E), LSFT(KC_R), LSFT(KC_T),   KC_TRNS,
+        KC_TRNS, LSFT(KC_A), LSFT(KC_S), LSFT(KC_D), LSFT(KC_F), LSFT(KC_G),
+        KC_TRNS, LSFT(KC_Z), LSFT(KC_X), LSFT(KC_C), LSFT(KC_V), LSFT(KC_B),   KC_TRNS,
+        KC_TRNS, KC_TRNS,    KC_TRNS,    KC_HOME,    KC_END,
+                                               KC_TRNS,  KC_TRNS,
+                                                                  KC_TRNS,
+                                               KC_TRNS,  KC_TRNS, KC_TRNS,
+        // right hand
+             KC_TRNS, LSFT(KC_6), LSFT(KC_7), LSFT(KC_8), LSFT(KC_9), LSFT(KC_0),  KC_TRNS,
+             KC_TRNS, LSFT(KC_Y), LSFT(KC_U), LSFT(KC_I), LSFT(KC_O), LSFT(KC_P),  KC_TRNS,
+                      LSFT(KC_H), LSFT(KC_J), LSFT(KC_K), LSFT(KC_L), KC_TRNS,     KC_TRNS,
+             KC_TRNS, LSFT(KC_N), LSFT(KC_M), KC_TRNS,    KC_TRNS,    KC_TRNS,     KC_TRNS,
+                                  KC_PGUP,    KC_PGDN,    KC_TRNS,    KC_TRNS,     KC_TRNS,
+             KC_TRNS, KC_TRNS,
+             KC_TRNS, 
+             KC_TRNS, KC_TRNS, KC_TRNS
+    ),    
+
+/* Keymap 3: ANSI_MODIFIERS 
+ *
+* ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |  esc   |      |      |      |      |      |      |           |      |      |      |      |      |      | backsp |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |  tab   |      |      |      |      |      |      |           |      |      |      |      |      |      |  | \   |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |  caps  |      |      |      |      |      |------|           |------|      |      |      |      |      |  entr  |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * | lshift |      |      |      |      |      |      |           |      |      |      |      |      |      | rshift |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   | lctl | lgui | lalt |      |      |                                       |      |      | ralt | rgui | rctl |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+----------.
+ *                                 |      |      |      |       |      |      |          |
+ *                                 |------|------|------|       |------|------|----------|
+ *                                 |      |      |      |       |      |      |          |
+ *                                 `--------------------'       `------------------------'
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[ANSI] = KEYMAP(  // layer 0 : default
+    // left hand
+       KC_ESC,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TAB,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_CAPS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_LSFT, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_LCTL, KC_LGUI, KC_LALT, KC_TRNS, KC_TRNS,
+                                           KC_TRNS, KC_TRNS,
+								                                    KC_TRNS,
+                                  KC_TRNS, KC_TRNS, KC_TRNS,
+    // right hand
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_BSPC,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_BSLS,
+                 KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_ENT,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_RSFT,
+                          KC_TRNS, KC_TRNS, KC_RALT, KC_RGUI, KC_RCTL,
+       KC_TRNS, KC_TRNS,
+       KC_TRNS, 
+       KC_TRNS, KC_TRNS, KC_TRNS
+    ),
+/* Keymap 4: Move window and mouse keys
+ *
+ * ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |  F1  |  F2  |  F3  |  F4  |  F5  |  F6  |           |  F7  |  F8  |  F9  | F10  | F11  | F12  |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |      |      | MsUp |      |      |      |           |      |      |guiNp7|guiNp8|guiNp9|      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |MsLeft|MsDown|MsRght|      |------|           |------| m/cls|guiNp4|guiNp5|guiNp6|      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |guiNp1|guiNp2|guiNp3|      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      | Lclk | Rclk |                                       | MsAc2| MsAc1| MsAc0|      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+------.
+ *                                 |      |      |      |       |      |      |      |
+ *                                 |------|------|------|       |------|------|------|
+ *                                 |      |      |      |       |      |      |      |
+ *                                 `--------------------'       `--------------------'
+ * TODO implement another layer from this layer to do normal numpad, add minimise and close window (movement to other workspaces)
+ */
+// MEDIA AND MOUSE
+[MOVEMODE] = KEYMAP(
+       KC_TRNS, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_MS_U, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_BTN1, KC_BTN2,
+                                           KC_TRNS, KC_TRNS,
+								                                    KC_TRNS,
+                                  KC_TRNS, KC_TRNS, KC_TRNS,
+    // right hand
+       KC_F7,    KC_F8,   KC_F9,      KC_F10,     KC_F11,     KC_F12,  KC_TRNS,
+       KC_TRNS,  KC_TRNS, LGUI(KC_P7),LGUI(KC_P8),LGUI(KC_P9),KC_TRNS, KC_TRNS,
+                 WIN_MM,  LGUI(KC_P4),LGUI(KC_P5),LGUI(KC_P6),KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_TRNS, LGUI(KC_P1),LGUI(KC_P2),LGUI(KC_P3),KC_TRNS, KC_TRNS,
+                          KC_ACL2,    KC_ACL1,    KC_ACL0,    KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS,
+       KC_TRNS, 
+       KC_TRNS, KC_TRNS, KC_TRNS
+),
+/* Keymap: ALTTAB 
+ *
+* ,--------------------------------------------------.           ,--------------------------------------------------.
+ * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |------|           |------|      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
+ * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
+ *   |      |      |      |      |      |                                       |      |      |      |      |      |
+ *   `----------------------------------'                                       `----------------------------------'
+ *                                        ,-------------.       ,-------------.
+ *                                        |      |      |       |      |      |
+ *                                 ,------|------|------|       |------+------+----------.
+ *                                 |      |      |      |       |      |      |          |
+ *                                 |------|------|------|       |------|------|----------|
+ *                                 |      |      |      |       |      |      |          |
+ *                                 `--------------------'       `------------------------'
+ */
+// If it accepts an argument (i.e, is a function), it doesn't need KC_.
+// Otherwise, it needs KC_*
+[ATAB] = KEYMAP(  // layer 0 : default
+    // left hand
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, 
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                                           KC_TRNS, KC_TRNS,
+								                                    KC_TRNS,
+                                  KC_TRNS, KC_TRNS, KC_TRNS,
+    // right hand
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                 KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                          KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS,
+       KC_TRNS, 
+       KC_TRNS, KC_TRNS, KC_TRNS
+    ),
+
+
+};
+
+const uint16_t PROGMEM fn_actions[] = {
+    [1] = ACTION_LAYER_TAP_TOGGLE(COLEMAK)                // FN1 - Momentary Layer 1 (Symbols)
+};
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record)
+{
+  // MACRODOWN only works in this function
+    if (record->event.pressed) {
+      switch(keycode) {
+        case M_BAT:
+          if(altTabbing == false){ 
+            altTabbing = true;
+            SEND_STRING(SS_DOWN(X_LALT));
+          }
+          SEND_STRING(SS_TAP(X_TAB));
+          return false;
+          break;
+        case KC_ENT:
+          if(altTabbing == true){
+            SEND_STRING(SS_UP(X_LALT));
+            altTabbing = false;
+          }
+          break;
+        case MAIL_END:
+          SEND_STRING("Vriendelijke groet,\nDavid Kleingeld");
+          return false;
+          break;
+        case WIN_MM:
+          winManagmentPressed = record->event.time;
+          return false;
+          break;
+        case SPSHFT:
+          if (shiftPressed == 0){
+            shiftPressed = record->event.time;
+            shiftIsOn = true;
+            layer_on(COLEMAK_SHIFTED);
+          } else if ((uint16_t)(record->event.time - shiftPressed) > 300){
+            SEND_STRING(SS_TAP(X_SPC));
+          }
+          break;          
+      } 
+    } else {//must be key release
+      switch(keycode) {
+        case WIN_MM:
+          if((uint16_t)record->event.time-winManagmentPressed > CLOSE_WIN_INTERVAL){
+            SEND_STRING(SS_LALT(SS_TAP(X_F4)));
+            return false;
+          } else {
+            
+            SEND_STRING(SS_LGUI(SS_TAP(X_H)));
+            return true;
+          }
+          break;
+        case SPSHFT:
+          if (shiftIsOn){
+            shiftIsOn = false;
+            layer_off(COLEMAK_SHIFTED);
+          } else{
+            SEND_STRING(SS_TAP(X_SPC));
+          }
+          return false;
+          break;
+      }
+    }
+    return true;
+};
+
+// Runs just one time when the keyboard initializes.
+void matrix_init_user(void) {
+
+};
+
+// Runs constantly in the background, in a loop.
+void matrix_scan_user(void) {
+
+    uint8_t layer = biton32(layer_state);
+
+    ergodox_board_led_off();
+    ergodox_right_led_1_off();
+    ergodox_right_led_2_off();
+    ergodox_right_led_3_off();
+    switch (layer) {
+      // TODO: Make this relevant to the ErgoDox EZ.
+        case COLEMAK:
+        case COLEMAK_SHIFTED:
+            break;
+        case PROGRAMMER:
+            ergodox_right_led_1_on();
+            break;
+        case QWERTY:
+            ergodox_right_led_2_on();
+            break;
+        case ANSI:
+            ergodox_right_led_2_on();
+            break;
+        case MOVEMODE:
+            ergodox_right_led_3_on();
+            break;
+        default:
+            // none
+            break;
+    }
+
+};
