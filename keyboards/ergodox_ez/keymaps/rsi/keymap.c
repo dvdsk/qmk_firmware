@@ -1,33 +1,20 @@
 #include QMK_KEYBOARD_H
-#include "debug.h"
+#include "quantum_keycodes.h"
 #include "action_layer.h"
 #include "version.h"
+#include "rsi.h"
 
-#define COLEMAK 0 // default layer
-#define PROGRAMMER 1 // default layer
-#define QWERTY 2 // default layer
-#define ANSI 3 // default layer
-#define MOVEMODE 4 // symbols
-
-#define COLEMAK_SHIFTED 5 // default layer
-#define QWERTY_SHIFTED 6 // default layer
-
-#define ATAB 7
+#define VERSION_STRING QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION
+#define _______ KC_TRNS
+#define X_____X KC_TRNS
+#define KC_ATM LGUI(LSFT(KC_P))
+#define KC_ATP LGUI(LCTL(KC_P))
+#define TO_NORM TO(NORMAL_MODE)
 
 bool altTabbing = false;
 bool shiftIsOn = false;
 uint16_t shiftPressed;
 uint16_t winManagmentPressed;
-
-#define CLOSE_WIN_INTERVAL 300
-enum macroKeycodes {
-  M_BAT = SAFE_RANGE, //begin alt tab
-  M_EAT,              //end alt-tab
-  MAIL_END,
-  WIN_MM,
-  TAPP,
-  SPSHFT
-};
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Colemak
@@ -60,9 +47,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[COLEMAK] = KEYMAP(  // layer 0 : default
+[COLEMAK] = LAYOUT_ergodox(  // layer 0 : default
         // left hand 
-        KC_ESC,                    KC_1,       KC_2,   KC_3,   KC_4,   KC_5,   KC_LOCK,
+        KC_ESC,                    KC_1,       KC_2,   KC_3,   KC_4,   KC_5,   KC_NO,
         KC_NO,                     KC_Q,       KC_W,   KC_F,   KC_P,   KC_G,   KC_NO,
         TT(MOVEMODE),              KC_A,       KC_R,   KC_S,   KC_T,   KC_D,
         LT(COLEMAK_SHIFTED, KC_NO),KC_Z,       KC_X,   KC_C,   KC_V,   KC_B,   KC_DEL,
@@ -106,7 +93,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[COLEMAK_SHIFTED] = KEYMAP(  // layer 0 : default
+[COLEMAK_SHIFTED] = LAYOUT_ergodox(  // layer 0 : default
         // left hand
         KC_TRNS, LSFT(KC_1), LSFT(KC_2), LSFT(KC_3), LSFT(KC_4), LSFT(KC_5),   KC_TRNS,
         KC_TRNS, LSFT(KC_Q), LSFT(KC_W), LSFT(KC_F), LSFT(KC_P), LSFT(KC_G),   KC_TRNS,
@@ -149,7 +136,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[PROGRAMMER] = KEYMAP(  // layer 0 : default
+[PROGRAMMER] = LAYOUT_ergodox(  // layer 0 : default
     // left hand
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_PSLS, KC_PPLS, KC_TRNS, KC_TRNS,
@@ -192,7 +179,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[QWERTY] = KEYMAP(  // layer 0 : default
+[QWERTY] = LAYOUT_ergodox(  // layer 0 : default
         // left hand
         KC_TRNS,                     KC_1,        KC_2,   KC_3,   KC_4,   KC_5,   KC_TRNS,
         KC_TRNS,                     KC_Q,        KC_W,   KC_E,   KC_R,   KC_T,   KC_TRNS,
@@ -235,7 +222,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[QWERTY_SHIFTED] = KEYMAP(  // layer 0 : default
+[QWERTY_SHIFTED] = LAYOUT_ergodox(  // layer 0 : default
         // left hand
         KC_TRNS, LSFT(KC_1), LSFT(KC_2), LSFT(KC_3), LSFT(KC_4), LSFT(KC_5),   KC_TRNS,
         KC_TRNS, LSFT(KC_Q), LSFT(KC_W), LSFT(KC_E), LSFT(KC_R), LSFT(KC_T),   KC_TRNS,
@@ -279,7 +266,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[ANSI] = KEYMAP(  // layer 0 : default
+[ANSI] = LAYOUT_ergodox(  // layer 0 : default
     // left hand
        KC_ESC,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TAB,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
@@ -322,7 +309,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * TODO implement another layer from this layer to do normal numpad, add minimise and close window (movement to other workspaces)
  */
 // MEDIA AND MOUSE
-[MOVEMODE] = KEYMAP(
+[MOVEMODE] = LAYOUT_ergodox(
        KC_TRNS, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_MS_U, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_MS_L, KC_MS_D, KC_MS_R, KC_TRNS,
@@ -364,7 +351,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
 // Otherwise, it needs KC_*
-[ATAB] = KEYMAP(  // layer 0 : default
+[ATAB] = LAYOUT_ergodox(  // layer 0 : default
     // left hand
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
@@ -425,7 +412,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             shiftIsOn = true;
             layer_on(COLEMAK_SHIFTED);
           } else if ((uint16_t)(record->event.time - shiftPressed) > 300){
-            SEND_STRING(SS_TAP(X_SPC));
+            //SEND_STRING(SS_TAP(X_SPC));//FIXME
           }
           break;          
       } 
@@ -446,7 +433,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             shiftIsOn = false;
             layer_off(COLEMAK_SHIFTED);
           } else{
-            SEND_STRING(SS_TAP(X_SPC));
+            //SEND_STRING(SS_TAP(X_SPC));//FIXME
           }
           return false;
           break;
@@ -482,6 +469,7 @@ void matrix_scan_user(void) {
             break;
         case ANSI:
             ergodox_right_led_2_on();
+            ergodox_right_led_3_on();
             break;
         case MOVEMODE:
             ergodox_right_led_3_on();
