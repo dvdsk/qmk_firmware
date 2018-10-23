@@ -2,7 +2,7 @@
 #include "quantum_keycodes.h"
 #include "action_layer.h"
 #include "version.h"
-#include "rsi.h"
+#include "rsi_try_redox.h"
 
 #define VERSION_STRING QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION
 #define _______ KC_TRNS
@@ -35,7 +35,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 ,------|------|------|       |------+-----+-------.
  *                                 |      |      |      |       |      |     |       |
  *                                 |------|------|------|       |------|-----|-------|
- *                                 | Space| BkSp | save |       | PROG | Tab | enter |
+ *                                 | Space| BkSp | save |       |      |enter| PROG  |
  *                                 `--------------------'       `--------------------'
  *
  * shift*: small to caps 
@@ -43,6 +43,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *          numbers to F keys
  * mov_W:  moves windows around and gives access to function keys
  * S-TAB:  shift tab
+ *
  *
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
@@ -65,7 +66,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
              TG(ANSI),      KC_NO,
              KC_NO,
-             MO(PROGRAMMER),KC_TAB,  KC_ENT
+             MO(PROGRAMMER),KC_ENT, MO(PROGRAMMER)
     ),
 /* Keymap 0: COLEMAK_SHIFTED
  *
@@ -131,7 +132,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                 ,--------|------|------|       |------+------+----------.
  *                                 |        |      |      |       |      |      |          |
  *                                 |--------|------|------|       |------|------|----------|
- *                                 |MAIL_END|      |      |       |      |      |          |
+ *                                 | tab    | del  | save |       |      |enter |          |
  *                                 `----------------------'       `------------------------'
  */
 // If it accepts an argument (i.e, is a function), it doesn't need KC_.
@@ -144,8 +145,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
                                            KC_TRNS, KC_TRNS,
-								                                    KC_TRNS,
-                                  MAIL_END,KC_TRNS, KC_TRNS,
+                                                    KC_TRNS,
+                                  KC_TAB,  KC_DEL,  KC_TRNS,
     // right hand
        KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS,  KC_UNDS, KC_PMNS, KC_PAST, KC_TRNS, KC_TRNS, KC_TRNS,
