@@ -79,52 +79,52 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 			}
 			return false;
 			break;
-	case KC_LSFT:
-		shift_held = record->event.pressed;
-		return true;
-		break;
-	case KC_RSFT:
-		shift_held = record->event.pressed;
-		return true;
-		break;
-		case M_BRACKET_LEFT: {
-			if (record->event.pressed) {
-				if (shift_held) {
-					unregister_code(KC_LSFT);
-					unregister_code(KC_RSFT);
-					register_code(KC_LBRC);
-				} else {
-					register_code(KC_LSFT);
-					register_code(KC_9);
-				}
-			} else { // Release the key
-				unregister_code(KC_LBRC);
-				unregister_code(KC_LSFT);
-				unregister_code(KC_RSFT);
-				unregister_code(KC_9);
-			}
-			return false;
-			break;
-		}
-		case M_BRACKET_RIGHT: {
-			if (record->event.pressed) {
-				if (shift_held) {
-					unregister_code(KC_LSFT);
-					unregister_code(KC_RSFT);
-					register_code(KC_RBRC);
-				} else {
-					register_code(KC_LSFT);
-					register_code(KC_0);
-				}
-			} else { // Release the key
-				unregister_code(KC_RBRC);
-				unregister_code(KC_LSFT);
-				unregister_code(KC_RSFT);
-				unregister_code(KC_0);
-			}
-			return false;
-			break;
-		}
+	    case KC_LSFT:
+		    shift_held = record->event.pressed;
+		    return true;
+		    break;
+	    case KC_RSFT:
+		    shift_held = record->event.pressed;
+		    return true;
+		    break;
+	    case M_BRACKET_LEFT: {
+		    if (record->event.pressed) {
+			    if (shift_held) {
+				    unregister_code(KC_LSFT);
+				    unregister_code(KC_RSFT);
+				    register_code(KC_LBRC);
+			    } else {
+				    register_code(KC_LSFT);
+				    register_code(KC_9);
+			    }
+		    } else { // Release the key
+			    unregister_code(KC_LBRC);
+			    unregister_code(KC_LSFT);
+			    unregister_code(KC_RSFT);
+			    unregister_code(KC_9);
+		    }
+		    return false;
+		    break;
+		    }
+	    case M_BRACKET_RIGHT: {
+		    if (record->event.pressed) {
+			    if (shift_held) {
+				    unregister_code(KC_LSFT);
+				    unregister_code(KC_RSFT);
+				    register_code(KC_RBRC);
+			    } else {
+				    register_code(KC_LSFT);
+				    register_code(KC_0);
+			    }
+		    } else { // Release the key
+			    unregister_code(KC_RBRC);
+			    unregister_code(KC_LSFT);
+			    unregister_code(KC_RSFT);
+			    unregister_code(KC_0);
+		    }
+		    return false;
+		    break;
+	    }
 	}
 	return true;
 };

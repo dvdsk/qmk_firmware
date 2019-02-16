@@ -12,5 +12,6 @@
 #define QWERTY_SHIFTED 6 // default layer
 
 #define ATAB 7
+#define ARROW 8
 
 #include "../../config.h"
