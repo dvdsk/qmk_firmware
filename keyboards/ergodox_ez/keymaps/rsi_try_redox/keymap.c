@@ -460,6 +460,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             //SEND_STRING(SS_TAP(X_SPC));//FIXME
           }
           break;          
+        case KC_R: //stop running if we press the back key
+          if (running) {
+            running = false;
+            unregister_code(KC_LSFT);
+            unregister_code(KC_W);
+          }
+          return true;
+        case M_ARUN:
+          if (running) {
+            running = false;
+            unregister_code(KC_LSFT);
+            unregister_code(KC_W);
+          }
+          return false;
       } 
     } else {//must be key release
       switch(keycode) {
@@ -496,26 +510,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             altTabbing = false;
             SEND_STRING(SS_DOWN(X_LALT));
           }
+          if (running) {
+            running = false;
+            unregister_code(KC_LSFT);
+            unregister_code(KC_W);
+          }
           return false;
         case M_ARUN:
-          if (running) {
-            running = false;
+          if (!running) {
+            running = true;
             register_code(KC_LSFT);
             register_code(KC_W);
-          } else {
-            running = true;
-            unregister_code(KC_LSFT);
-            unregister_code(KC_W);
           }
-        return false;
+          return false;
         break;
-        case KC_R: //stop running if we press the back key
-          if (running) {
-            running = false;
-            unregister_code(KC_LSFT);
-            unregister_code(KC_W);
-          }
-        return true;
       }
     }
     return true; // Let QMK send the enter press/release events
