@@ -19,5 +19,7 @@ enum macroKeycodes {
   MAIL_END,
   WIN_MM,
   TAPP,
-  SPSHFT
+  SPSHFT,
+  M_RESET,
+  M_ARUN
 };

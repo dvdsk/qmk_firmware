@@ -13,6 +13,7 @@
 
 bool altTabbing = false;
 bool shiftIsOn = false;
+bool running = false;
 uint16_t shiftPressed;
 uint16_t winManagmentPressed;
 
@@ -22,8 +23,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |   Esc  |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  | lock   |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |    ~   |   q  |   w  |   f  |   p  |   g  |      |           |      |   j  |   l  |   u  |   y  |   ?  | tapp   |
- * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |    ~   |   q  |   w  |   f  |   p  |   g  | shift|           |reset |   j  |   l  |   u  |   y  |   ?  | tapp   |
+ * |--------+------+------+------+------+------| w tgl|           |      |------+------+------+------+------+--------|
  * | mov_W  |   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
  * |--------+------+------+------+------+------| del  |           |  \   |------+------+------+------+------+--------|
  * | shift* |   z  |   x  |   c  |   v  |   b  |      |           |      |   k  |   m  |   ,  |   .  |   ;  | shift  |
@@ -33,9 +34,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        ,-------------.       ,------------.
  *                                        | ARRO | QWRT |       | ANSI |     |
  *                                 ,------|------|------|       |------+-----+-------.
- *                                 |      |      |      |       |      |     |       |
+ *                                 |      |      |MEH(c)|       |MEH(a)|     |       |
  *                                 |------|------|------|       |------|-----|-------|
- *                                 | Space| BkSp | save |       |      |enter| PROG  |
+ *                                 | Space| BkSp | save |       |MEH(b)|enter| PROG  |
  *                                 `--------------------'       `--------------------'
  *
  * shift*: small to caps 
@@ -50,23 +51,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [COLEMAK] = LAYOUT_ergodox(  // layer 0 : default
         // left hand 
-        KC_ESC,                    KC_1,       KC_2,   KC_3,   KC_4,   KC_5,   KC_NO,
-        KC_TILD,                   KC_Q,       KC_W,   KC_F,   KC_P,   KC_G,   KC_NO,
-        TT(MOVEMODE),              KC_A,       KC_R,   KC_S,   KC_T,   KC_D,
-        LT(COLEMAK_SHIFTED, KC_NO),KC_Z,       KC_X,   KC_C,   KC_V,   KC_B,   KC_DEL,
-        KC_LCTRL,                  KC_RALT,    KC_LGUI,KC_LEFT,KC_RGHT,
-                                                         TG(ARROW), TG(QWERTY),
-                                                                    KC_NO,
-                                                    KC_SPC, KC_BSPC,LCTL(KC_S),
+        KC_ESC,                    KC_1,       KC_2,   KC_3,     KC_4,   KC_5,   KC_NO,
+        KC_TILD,                   KC_Q,       KC_W,   KC_F,     KC_P,   KC_G,   M_ARUN,
+        TT(MOVEMODE),              KC_A,       KC_R,   KC_S,     KC_T,   KC_D,
+        MO(COLEMAK_SHIFTED),       KC_Z,       KC_X,   KC_C,     KC_V,   KC_B,   KC_DEL,
+        KC_LCTRL,                  KC_RALT,    KC_LGUI,KC_LEFT,  KC_RGHT,
+                                                                          TG(ARROW), TG(QWERTY),
+                                                                                     MEH_T(KC_C),
+                                                                  KC_SPC, KC_BSPC,   LCTL(KC_S),
         // right hand
              KC_NO,     KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             KC_NO,
-             KC_NO,     KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          KC_NO,
+             M_RESET,   KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          KC_NO,
                         KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
              KC_BSLASH, KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
                                 KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
              TG(ANSI),      KC_NO,
-             KC_NO,
-             MO(PROGRAMMER),KC_ENT, MO(PROGRAMMER)
+             MEH_T(KC_A),
+             MEH_T(KC_B),   KC_ENT, MO(PROGRAMMER)
     ),
 /* Keymap 0: COLEMAK_SHIFTED
  *
@@ -139,20 +140,20 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [PROGRAMMER] = LAYOUT_ergodox(  // layer 0 : default
     // left hand
-       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-       KC_TRNS, KC_TRNS, KC_TRNS, KC_PSLS, KC_PPLS, KC_DQUO, KC_TRNS,
-       KC_TRNS, KC_LBRC, KC_LCBR, KC_LPRN, KC_PEQL, KC_LT,
-       KC_TRNS, KC_TRNS, KC_TRNS, KC_PIPE, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,      KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_SLSH, LSFT(KC_EQL), KC_DQUO, KC_TRNS,
+       KC_TRNS, KC_LBRC, KC_LCBR, KC_LPRN, KC_PEQL,      KC_LT,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_PIPE, KC_TRNS,      KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-                                           KC_TRNS, KC_TRNS,
-                                                    KC_TRNS,
-                                  KC_TAB,  KC_DEL,  KC_TRNS,
+                                           KC_TRNS,      KC_TRNS,
+                                                         KC_TRNS,
+                                  KC_TAB,  KC_DEL,       KC_TRNS,
     // right hand
-       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-       KC_TRNS,  KC_UNDS, KC_PMNS, KC_PAST, KC_TRNS, KC_TRNS, KC_TRNS,
-                 KC_GT,   KC_PEQL, KC_RPRN, KC_RCBR, KC_RBRC, KC_TRNS,
-       KC_TRNS,  KC_TRNS, KC_TRNS, KC_AMPR, KC_TRNS, KC_TRNS, KC_TRNS,
-                          KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,
+       KC_TRNS,  KC_UNDS, KC_MINS, LSFT(KC_8), KC_TRNS, KC_TRNS, KC_TRNS,
+                 KC_GT,   KC_PEQL, KC_RPRN,    KC_RCBR, KC_RBRC, KC_TRNS,
+       KC_TRNS,  KC_TRNS, KC_TRNS, KC_AMPR,    KC_TRNS, KC_TRNS, KC_TRNS,
+                          KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS, KC_TRNS,
        KC_TRNS, 
        KC_TRNS, KC_TRNS, KC_TRNS
@@ -422,6 +423,7 @@ const uint16_t PROGMEM fn_actions[] = {
     [1] = ACTION_LAYER_TAP_TOGGLE(COLEMAK)                // FN1 - Momentary Layer 1 (Symbols)
 };
 
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
   // MACRODOWN only works in this function
@@ -433,7 +435,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             SEND_STRING(SS_DOWN(X_LALT));
           }
           SEND_STRING(SS_TAP(X_TAB));
-          return false;
+          return false; // Skip all further processing of this key
           break;
         case KC_ENT:
           if(altTabbing == true){
@@ -470,7 +472,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             SEND_STRING(SS_LGUI(SS_TAP(X_H)));
             return true;
           }
-          break;
         case SPSHFT:
           if (shiftIsOn){
             shiftIsOn = false;
@@ -479,10 +480,45 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             //SEND_STRING(SS_TAP(X_SPC));//FIXME
           }
           return false;
-          break;
+        case M_RESET:
+          layer_off(PROGRAMMER);
+          layer_off(QWERTY);
+          layer_off(ANSI);
+          layer_off(MOVEMODE);
+          layer_off(COLEMAK_SHIFTED);
+          layer_off(QWERTY_SHIFTED);
+          layer_off(ATAB);
+          layer_off(ARROW);
+          layer_on(COLEMAK);
+
+          shiftIsOn = false;
+          if(altTabbing == true){ 
+            altTabbing = false;
+            SEND_STRING(SS_DOWN(X_LALT));
+          }
+          return false;
+        case M_ARUN:
+          if (running) {
+            running = false;
+            register_code(KC_LSFT);
+            register_code(KC_W);
+          } else {
+            running = true;
+            unregister_code(KC_LSFT);
+            unregister_code(KC_W);
+          }
+        return false;
+        break;
+        case KC_R: //stop running if we press the back key
+          if (running) {
+            running = false;
+            unregister_code(KC_LSFT);
+            unregister_code(KC_W);
+          }
+        return true;
       }
     }
-    return true;
+    return true; // Let QMK send the enter press/release events
 };
 
 // Runs just one time when the keyboard initializes.
@@ -511,7 +547,6 @@ void matrix_scan_user(void) {
             ergodox_right_led_2_on();
             break;
         case ANSI:
-            ergodox_right_led_2_on();
             ergodox_right_led_3_on();
             break;
         case MOVEMODE:
