@@ -1,3 +1,12 @@
+build using:
+
+make ergodox_ez:rsi_try_redox
+
+flash using:
+
+sudo ./teensy_linux64/teensy
+
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
