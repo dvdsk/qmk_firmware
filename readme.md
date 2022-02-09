@@ -1,9 +1,12 @@
 quick setup notes 
 
-pip3 install --user qmk
-qmk setup -H ~/Documents/qmk_firmware dvdsk/qmk_firmware
+`pip3 install --user qmk`
+
+`qmk setup -H ~/Documents/qmk_firmware dvdsk/qmk_firmware`
+
 (now the python setup tool will clone, setup submodules and install debian packages)
-qmk flash -kb ergodox_ez -km dvdsk
+
+`qmk flash -kb ergodox_ez -km dvdsk`
 
 Done :)
 
