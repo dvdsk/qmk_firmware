@@ -1,11 +1,11 @@
-build using:
+quick setup notes 
 
-make ergodox_ez:rsi_try_redox
+pip3 install --user qmk
+qmk setup -H ~/Documents/qmk_firmware dvdsk/qmk_firmware
+(now the python setup tool will clone, setup submodules and install debian packages)
+qmk flash -kb ergodox_ez -km dvdsk
 
-flash using:
-
-sudo ./teensy_linux64/teensy
-
+Done :)
 
 # Quantum Mechanical Keyboard Firmware
 
