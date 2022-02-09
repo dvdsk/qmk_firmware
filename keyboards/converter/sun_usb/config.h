@@ -15,17 +15,13 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef CONFIG_H
-#define CONFIG_H
-
-#define CUSTOM_MATRIX 2
+#pragma once
 
 #define VENDOR_ID       0xFEED
 #define PRODUCT_ID      0x3333
 #define DEVICE_VER      0x0100
 #define MANUFACTURER    QMK
 #define PRODUCT         Sun keyboard converter
-#define DESCRIPTION     USB converter for Sun type 5 keyboard
 
 /* matrix size */
 #define MATRIX_ROWS 16
@@ -33,9 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 /* key combination for command */
 #define IS_COMMAND() ( \
-    keyboard_report->mods == (MOD_BIT(KC_LALT) | MOD_BIT(KC_RALT)) || \
-    keyboard_report->mods == (MOD_BIT(KC_LGUI) | MOD_BIT(KC_RGUI)) || \
-    keyboard_report->mods == (MOD_BIT(KC_LSHIFT) | MOD_BIT(KC_RSHIFT)) \
+    get_mods() == (MOD_BIT(KC_LALT) | MOD_BIT(KC_RALT)) || \
+    get_mods() == (MOD_BIT(KC_LGUI) | MOD_BIT(KC_RGUI)) || \
+    get_mods() == (MOD_BIT(KC_LSHIFT) | MOD_BIT(KC_RSHIFT)) \
 )
 
 
@@ -84,5 +80,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     /* idle */ \
     SERIAL_SOFT_TXD_ON(); \
 } while (0)
-
-#endif
