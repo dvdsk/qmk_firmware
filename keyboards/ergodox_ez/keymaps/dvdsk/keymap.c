@@ -20,9 +20,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Colemak
  *
  * ,--------------------------------------------------.           ,--------------------------------------------------.
- * |   Esc  |   1  |   2  |   3  |   4  |   5  |      |           |      |   6  |   7  |   8  |   9  |   0  | lock   |
+ * |   Esc  |   1  |   2  |   3  |   4  |   5  |MEH(e)|           | reset|   6  |   7  |   8  |   9  |   0  | MEH(g) |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |  Esc   |   q  |   w  |   f  |   p  |   g  | shift|           |reset |   j  |   l  |   u  |   y  |   ?  | tapp   |
+ * |  Esc   |   q  |   w  |   f  |   p  |   g  | shift|           |MEH(d)|   j  |   l  |   u  |   y  |   ?  | MEH(h) |
  * |--------+------+------+------+------+------| w tgl|           |      |------+------+------+------+------+--------|
  * |   mov_W|   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
  * |--------+------+------+------+------+------| del  |           |  \   |------+------+------+------+------+--------|
@@ -31,7 +31,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *   | ctrl | alt  | gui  | Left | Right|                                       |  Up  |  Down| S-Tab| vol+ | vol- |
  *   `----------------------------------'                                       `----------------------------------'
  *                                        ,-------------.       ,------------.
- *                                        | ARRO | QWRT |       | ANSI |     |
+ *                                        | ARRO | QWRT |       | ANSI |MEH(f|
  *                                 ,------|------|------|       |------+-----+-------.
  *                                 |      |      |MEH(c)|       |MEH(a)|     | Esc   |
  *                                 |      |      |------|       |------|     |  or   |
@@ -50,7 +50,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [COLEMAK] = LAYOUT_ergodox(  // layer 0 : default
         // left hand 
-        KC_ESC,                    KC_1,       KC_2,   KC_3,     KC_4,   KC_5,   KC_NO,
+        KC_ESC,                    KC_1,       KC_2,   KC_3,     KC_4,   KC_5,   MEH_T(KC_E),
         KC_ESC,                    KC_Q,       KC_W,   KC_F,     KC_P,   KC_G,   M_ARUN,
         TT(MOVEMODE),              KC_A,       KC_R,   KC_S,     KC_T,   KC_D,
         MO(COLEMAK_SHIFTED),       KC_Z,       KC_X,   KC_C,     KC_V,   KC_B,   KC_DEL,
@@ -59,12 +59,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                                                      MEH_T(KC_C),
                                                                   KC_SPC, KC_BSPC,   LCTL(KC_S),
         // right hand
-             KC_NO,     KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             KC_NO,
-             M_RESET,   KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          KC_NO,
-                        KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
-             KC_BSLASH, KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
+             M_RESET,     KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             MEH_T(KC_G),
+             MEH_T(KC_D), KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          MEH_T(KC_H),
+                          KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
+             KC_BSLASH,   KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
                                 KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
-             TG(ANSI),      KC_NO,
+             TG(ANSI),      MEH_T(KC_F),
              MEH_T(KC_A),
              MEH_T(KC_B),   KC_ENT, LT(PROGRAMMER, KC_ESC)
     ),
