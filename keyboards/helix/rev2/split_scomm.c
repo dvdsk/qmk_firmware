@@ -5,13 +5,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include <split_scomm.h>
+#include "split_scomm.h"
 #include "serial.h"
-#ifdef SERIAL_DEBUG_MODE
-#include <avr/io.h>
-#endif
 #ifdef CONSOLE_ENABLE
-  #include <print.h>
+  #include "print.h"
 #endif
 
 uint8_t volatile serial_slave_buffer[SERIAL_SLAVE_BUFFER_LENGTH] = {0};
