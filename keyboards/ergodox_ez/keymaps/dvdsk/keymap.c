@@ -59,12 +59,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                                                      LALT(KC_6),
                                                                   KC_SPC, KC_BSPC,   LCTL(KC_S),
         // right hand
-             LALT(KC_5),  KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             M_RESET,
-             LALT(KC_3),  KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          M_RESET,
+             LALT(KC_5),  KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             LALT(KC_4),
+             LALT(KC_3),  KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          LALT(KC_2),
                           KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
              KC_BSLASH,   KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
                                   KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
-             TG(ANSI), LALT(KC_2),
+             TG(ANSI),     M_RESET,
              LALT(KC_1),
              LALT(KC_0),   KC_ENT, LT(PROGRAMMER, KC_ESC)
     ),
@@ -434,7 +434,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             SEND_STRING(SS_LALT(SS_TAP(X_F4)));
             return false;
           } else {
-            
             SEND_STRING(SS_LGUI(SS_TAP(X_H)));
             return true;
           }
@@ -447,15 +446,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
           }
           return false;
         case M_RESET:
-          layer_off(PROGRAMMER);
-          layer_off(QWERTY);
-          layer_off(ANSI);
-          layer_off(MOVEMODE);
-          layer_off(COLEMAK_SHIFTED);
-          layer_off(QWERTY_SHIFTED);
-          layer_off(ARROW);
-          layer_on(COLEMAK);
-
+		  layer_clear();
           shiftIsOn = false;
           if(altTabbing == true){ 
             altTabbing = false;
@@ -480,15 +471,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
     return true; // Let QMK send the enter press/release events
 };
 
-// Runs just one time when the keyboard initializes.
-void matrix_init_user(void) {
 
-};
-
-// Runs constantly in the background, in a loop.
-void matrix_scan_user(void) {
-
-    uint8_t layer = biton32(layer_state);
+// Runs on any layer change
+layer_state_t layer_state_set_user(layer_state_t state) {
+    uint8_t layer = get_highest_layer(state);
 
     ergodox_board_led_off();
     ergodox_right_led_1_off();
@@ -516,4 +502,5 @@ void matrix_scan_user(void) {
             break;
     }
 
+	return state;
 };
