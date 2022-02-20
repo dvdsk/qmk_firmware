@@ -2,7 +2,7 @@
 #include "quantum_keycodes.h"
 #include "action_layer.h"
 #include "version.h"
-#include "rsi_try_redox.h"
+#include "dvdsk.h"
 
 #define VERSION_STRING QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION
 #define X_____X KC_TRNS
@@ -20,9 +20,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 /* Keymap 0: Colemak
  *
  * ,--------------------------------------------------.           ,--------------------------------------------------.
- * |   Esc  |   1  |   2  |   3  |   4  |   5  | A(7) |           | reset|   6  |   7  |   8  |   9  |   0  | A(5)   |
+ * |   Esc  |   1  |   2  |   3  |   4  |   5  | A(7) |           | A(5) |   6  |   7  |   8  |   9  |   0  | reset  |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |  Esc   |   q  |   w  |   f  |   p  |   g  | shift|           |A(3)  |   j  |   l  |   u  |   y  |   ?  | A(4)   |
+ * |  Esc   |   q  |   w  |   f  |   p  |   g  | shift|           | A(3) |   j  |   l  |   u  |   y  |   ?  | A(4)   |
  * |--------+------+------+------+------+------| w tgl|           |      |------+------+------+------+------+--------|
  * |   mov_W|   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
  * |--------+------+------+------+------+------| del  |           |  \   |------+------+------+------+------+--------|
@@ -59,8 +59,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                                                      LALT(KC_6),
                                                                   KC_SPC, KC_BSPC,   LCTL(KC_S),
         // right hand
-             M_RESET,     KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             LALT(KC_5),
-             LALT(KC_3),  KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          LALT(KC_4),
+             LALT(KC_5),  KC_6,   KC_7,   KC_8,   KC_9,          KC_0,             M_RESET,
+             LALT(KC_3),  KC_J,   KC_L,   KC_U,   KC_Y,          KC_SLSH,          M_RESET,
                           KC_H,   KC_N,   KC_E,   KC_I,          KC_O,             M_BAT,
              KC_BSLASH,   KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,          KC_RSHIFT,
                                   KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,          KC_VOLU,
@@ -398,10 +398,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
             SEND_STRING(SS_UP(X_LALT));
             altTabbing = false;
           }
-          break;
-        case MAIL_END:
-          SEND_STRING("Vriendelijke groet,\nDavid Kleingeld");
-          return false;
           break;
         case WIN_MM:
           winManagmentPressed = record->event.time;
