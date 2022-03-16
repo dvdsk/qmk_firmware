@@ -22,9 +22,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,--------------------------------------------------.           ,--------------------------------------------------.
  * |   Esc  |   1  |   2  |   3  |   4  |   5  | A(7) |           | A(5) |   6  |   7  |   8  |   9  |   0  | reset  |
  * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
- * |  Esc   |   q  |   w  |   f  |   p  |   g  | shift|           | A(3) |   j  |   l  |   u  |   y  |   ?  | A(4)   |
- * |--------+------+------+------+------+------| w tgl|           |      |------+------+------+------+------+--------|
- * |   mov_W|   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
+ * |shftwtgl|   q  |   w  |   f  |   p  |   g  | tab  |           | A(3) |   j  |   l  |   u  |   y  |   ?  | A(4)   |
+ * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
+ * |  mov_W |   a  |   r  |   s  |   t  |   d  |------|           |------|   h  |   n  |   e  |   i  |   o  | alt-tab|
  * |--------+------+------+------+------+------| del  |           |  \   |------+------+------+------+------+--------|
  * | shift* |   z  |   x  |   c  |   v  |   b  |      |           |      |   k  |   m  |   ,  |   .  |   ;  | shift  |
  * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
@@ -51,7 +51,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 [COLEMAK] = LAYOUT_ergodox(  // layer 0 : default
         // left hand 
         KC_ESC,                    KC_1,       KC_2,   KC_3,     KC_4,   KC_5,   LALT(KC_7),
-        KC_ESC,                    KC_Q,       KC_W,   KC_F,     KC_P,   KC_G,   M_ARUN,
+        M_ARUN,                    KC_Q,       KC_W,   KC_F,     KC_P,   KC_G,   KC_TAB,
         TT(MOVEMODE),              KC_A,       KC_R,   KC_S,     KC_T,   KC_D,
         MO(COLEMAK_SHIFTED),       KC_Z,       KC_X,   KC_C,     KC_V,   KC_B,   KC_DEL,
         KC_LCTRL,                  KC_RALT,    KC_LGUI,KC_LEFT,  KC_RGHT,
