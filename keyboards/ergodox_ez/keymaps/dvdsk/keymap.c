@@ -139,14 +139,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 // Otherwise, it needs KC_*
 [PROGRAMMER] = LAYOUT_ergodox(  // layer 0 : default
     // left hand
-       KC_TRNS, M_LIN_NLY,  M_LIN_NLN, KC_TRNS, KC_TRNS,      KC_TRNS, KC_TRNS,
-       KC_TRNS, KC_TRNS,    KC_QUOT,  KC_SLSH, LSFT(KC_EQL), KC_DQUO, KC_TRNS,
-       KC_TRNS, KC_LBRC,    KC_LCBR,  KC_ESC,  KC_LPRN,      KC_LT,
-       KC_TRNS, KC_TRNS,    KC_TRNS,  KC_PIPE, KC_GRV,       KC_TRNS, KC_TRNS,
-       KC_TRNS, KC_TRNS,    KC_TRNS,  KC_TRNS, KC_TRNS,
-                                                        KC_TRNS,      KC_TRNS,
-                                                                      KC_TRNS,
-                                               KC_TAB,  KC_DEL,       KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,      KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_QUOT, KC_SLSH, LSFT(KC_EQL), KC_DQUO, KC_TRNS,
+       KC_TRNS, KC_LBRC, KC_LCBR, KC_ESC,  KC_LPRN,      KC_LT,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_PIPE, KC_GRV,       KC_TRNS, KC_TRNS,
+       KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+                                           KC_TRNS,      KC_TRNS,
+                                                         KC_TRNS,
+                                  KC_TAB,  KC_DEL,       KC_TRNS,
     // right hand
        KC_TRNS,  KC_TRNS, KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,
        KC_TRNS,  KC_UNDS, KC_MINS, LSFT(KC_8), KC_TILD, KC_TRNS, KC_TRNS,
@@ -379,25 +379,12 @@ const uint16_t PROGMEM fn_actions[] = {
     [1] = ACTION_LAYER_TAP_TOGGLE(COLEMAK)                // FN1 - Momentary Layer 1 (Symbols)
 };
 
-void send_long_string(const char* str) {
-	// TODO
-}
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record)
 {
   // MACRODOWN only works in this function
     if (record->event.pressed) {
       switch(keycode) {
-		case M_LIN_NLY:
-		  if (record->event.pressed) {
-			send_string(linkedin_nl_yes);
-		  }
-		  break;
-		case M_LIN_NLN:
-		  if (record->event.pressed) {
-			send_string(linkedin_nl_no);
-		  }
-		  break;
         case M_BAT:
           if(altTabbing == false){ 
             altTabbing = true;
