@@ -9,19 +9,19 @@
 #define _COLEMAK_SHIFTED 2
 #define _QWERTY 3
 
-enum custom_keycodes {
-  COLEMAK = SAFE_RANGE,
-  PROGRAMMER,
-  COLEMAK_SHIFTED,
-  QWERTY,
-};
+// enum custom_keycodes {
+//   COLEMAK = SAFE_RANGE,
+//   PROGRAMMER,
+//   COLEMAK_SHIFTED,
+//   QWERTY,
+// };
 
 // Shortcut to make keymap more readable
 #define KC_LA4 LALT(KC_4)
 #define KC_LA3 LALT(KC_3)
 #define KC_LA2 LALT(KC_2)
 
-#define KC_LTPR LT(PROGRAMMER, KC_ESC)
+#define KC_LTPR LT(_PROGRAMMER, KC_ESC)
 #define KC_LSTA LSFT(KC_TAB)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
