@@ -115,7 +115,7 @@ bool auto_run(uint16_t keycode, bool pressed) {
 				unregister_code(KC_LSFT);
 				unregister_code(KC_W);
 			}
-			return false;
+			return true;
 		}
 	} else {
         if ((keycode == M_ARUN) && running) {
