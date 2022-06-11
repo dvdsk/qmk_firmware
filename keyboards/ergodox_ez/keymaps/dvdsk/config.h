@@ -8,9 +8,4 @@
 #define ANSI 3 // default layer
 #define MOVEMODE 4 // symbols
 
-#define COLEMAK_SHIFTED 5 // default layer
-#define QWERTY_SHIFTED 6 // default layer
-
-#define ARROW 8
-
 #include "../../config.h"
