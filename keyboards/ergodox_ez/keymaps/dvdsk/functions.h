@@ -5,35 +5,57 @@ typedef struct RemappedPressed {
 	bool right;
 	bool up;
 	bool down;
+	bool lshift;
+	bool rshift;
+	/// a remapped key has been pressed and shift has not yet
+	/// been lifted
+	bool active;
 } RemappedPressed;
 
+void lift_shift(RemappedPressed* pressed) {
+	if (pressed->lshift) {
+		unregister_code(KC_LSFT);
+		pressed->lshift = false;
+	} else { // right must be the one pressed
+		unregister_code(KC_RSFT);
+		pressed->rshift = false;
+	}
+}
 
-bool pressed_shift_remapped(uint16_t keycode, bool shift_held, RemappedPressed pressed) {
+bool pressed_shift_remapped(uint16_t keycode, RemappedPressed* pressed) {
 	switch (keycode) {
 	case KC_LEFT:
-		if (shift_held) {
-			pressed.left = true;
+		if (pressed->rshift || pressed->lshift || pressed->active) {
+			pressed->left = true;
+			pressed->active = true;
+			lift_shift(pressed);
 			register_code(KC_HOME);
 			return false;
 		}
 		break;
 	case KC_RGHT:
-		if (shift_held) {
-			pressed.right = true;
+		if (pressed->rshift || pressed->lshift || pressed->active) {
+			pressed->right = true;
+			pressed->active = true;
+			lift_shift(pressed);
 			register_code(KC_END);
 			return false;
 		}
 		break;
 	case KC_UP:
-		if (shift_held) {
-			pressed.up = true;
+		if (pressed->rshift || pressed->lshift || pressed->active) {
+			pressed->up = true;
+			pressed->active = true;
+			lift_shift(pressed);
 			register_code(KC_PGUP);
 			return false;
 		}
 		break;
 	case KC_DOWN:
-		if (shift_held) {
-			pressed.down = true;
+		if (pressed->rshift || pressed->lshift || pressed->active) {
+			pressed->down = true;
+			pressed->active = true;
+			lift_shift(pressed);
 			register_code(KC_PGDN);
 			return false;
 		}
@@ -42,28 +64,32 @@ bool pressed_shift_remapped(uint16_t keycode, bool shift_held, RemappedPressed p
 	return true;
 }
 
-bool released_shift_remapped(uint16_t keycode, RemappedPressed pressed) {
+bool released_shift_remapped(uint16_t keycode, RemappedPressed* pressed) {
 	switch (keycode) {
 	case KC_LEFT:
-		if (pressed.left) {
+		if (pressed->left) {
+			pressed->left = false;
 			unregister_code(KC_HOME);
 			return false;
 		}
 		break;
 	case KC_RGHT:
-		if (pressed.right) {
+		if (pressed->right) {
+			pressed->right = false;
 			unregister_code(KC_END);
 			return false;
 		}
 		break;
 	case KC_UP:
-		if (pressed.up) {
+		if (pressed->up) {
+			pressed->up = false;
 			unregister_code(KC_PGUP);
 			return false;
 		}
 		break;
 	case KC_DOWN:
-		if (pressed.down) {
+		if (pressed->down) {
+			pressed->down = false;
 			unregister_code(KC_PGDN);
 			return false;
 		}
@@ -72,28 +98,37 @@ bool released_shift_remapped(uint16_t keycode, RemappedPressed pressed) {
 	return true;
 }
 
-bool shift_held = false;
 RemappedPressed remapped_pressed = {
 	.left = false,
 	.right = false,
 	.up = false,
 	.down = false,
+	.lshift = false,
+	.rshift = false,
+	.active = false,
 };
 
 bool shift_remapped(uint16_t keycode, bool pressed) {
 	switch (keycode) {
 	case KC_RSFT:
+		remapped_pressed.rshift = pressed;
+		if (!pressed) { // released
+			remapped_pressed.active = false;
+		}
+		return true;
 	case KC_LSFT:
-		shift_held = pressed;
+		remapped_pressed.lshift = pressed;
+		if (!pressed) { // released
+			remapped_pressed.active = false;
+		}
 		return true;
 	}
 
-	return true;
 	if (pressed) {
-		return pressed_shift_remapped(keycode, shift_held, remapped_pressed);
+		return pressed_shift_remapped(keycode, &remapped_pressed);
 	} 
 
-	return released_shift_remapped(keycode, remapped_pressed);
+	return released_shift_remapped(keycode, &remapped_pressed);
 }
 
 // returns true if this did nothing and QMK should 
@@ -138,9 +173,7 @@ bool reset(uint16_t keycode, bool pressed) {
 		return true;
 	}
 
-	shift_held = false;
 	layer_clear();
-
 	if (running) {
 		running = false;
 		unregister_code(KC_LSFT);
