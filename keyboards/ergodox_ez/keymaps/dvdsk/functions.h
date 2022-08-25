@@ -140,24 +140,18 @@ bool auto_run(uint16_t keycode, bool pressed) {
 		case M_ARUN:
 			if (!running) {
 				running = true;
-				register_code(KC_LSFT);
 				register_code(KC_W);
+			} else {
+				running = false;
+				unregister_code(KC_W);
 			}
 			return false;
 		case KC_R: //stop running if we press the back key
 			if (running) {
 				running = false;
-				unregister_code(KC_LSFT);
 				unregister_code(KC_W);
 			}
 			return true;
-		}
-	} else {
-        if ((keycode == M_ARUN) && running) {
-            running = false;
-            unregister_code(KC_LSFT);
-            unregister_code(KC_W);
-			return false;
 		}
 	} // not pressed
 	return true;

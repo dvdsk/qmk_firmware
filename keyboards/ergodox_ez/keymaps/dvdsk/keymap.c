@@ -24,7 +24,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                                        ,-------------.       ,------------.
  *                                        | A(8) | QWRT |       | ANSI | A(2)|
  *                                 ,------|------|------|       |------+-----+-------.
- *                                 |      |      | A(6) |       | A(1) |     | Esc   |
+ *                                 |      |      | A(6) |       | autow|     | Esc   |
  *                                 |      |      |------|       |------|     |  or   |
  *                                 | Space| BkSp | save |       | A(0) |enter| PROG  |
  *                                 `--------------------'       `--------------------'
@@ -56,7 +56,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              KC_BSLASH,   KC_K,   KC_M,   KC_COMM,KC_DOT,        KC_SCLN,   KC_RSHIFT,
                                   KC_UP,  KC_DOWN,LSFT(KC_TAB),  KC_VOLD,   KC_VOLU,
              TG(ANSI),     M_RESET,
-             LALT(KC_1),
+             M_ARUN,
              LALT(KC_0),   KC_ENT, LT(PROGRAMMER, KC_ESC)
     ),
 
